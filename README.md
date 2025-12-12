@@ -44,7 +44,8 @@
     pip install Flask Flask-SQLAlchemy Flask-WTF psycopg2-binary python-dotenv pandas openpyxl
     ```
 3.  **Настройте базу данных:**
-    *   Создайте БД в PostgreSQL.
+    *   Создайте БД в `PostgreSQL`.
+    *   Вставьте код с файла `.sql`
 4.  **Инициализируйте БД и импортируйте данные:**
     ```bash
     python init_db.py
