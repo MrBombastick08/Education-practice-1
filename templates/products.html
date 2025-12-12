@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Комфорт - Продукция{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Список продукции</h1>
+    
+    <div class="table-container">
+        <a href="{{ url_for('add_product') }}" class="btn">Добавить продукт</a>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Артикул</th>
+                    <th>Наименование</th>
+                    <th>Тип продукции</th>
+                    <th>Стоимость для партнера</th>
+                    <th>Время изготовления (часы)</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.article }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.product_type.name }}</td>
+                    <td>{{ product.min_cost_for_partner }} ₽</td>
+                    <td>{{ production_times[product.id] }}</td>
+                    <td>
+                        <a href="{{ url_for('edit_product', product_id=product.id) }}" class="btn">Редактировать</a>
+                        <a href="{{ url_for('workshops', product_id=product.id) }}" class="btn">Цеха</a>
+                        <form method="POST" action="{{ url_for('delete_product', product_id=product.id) }}" class="delete-form" style="display: inline;">
+                            <button type="submit" class="btn btn-danger btn-delete" data-action="удалить продукт">Удалить</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center;">Нет данных о продукции</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Комфорт - Калькулятор сырья{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Калькулятор сырья</h1>
+    
+    <div class="calculator-container">
+        <p>Рассчитайте количество сырья, необходимое для производства заданного количества продукции с учетом потерь.</p>
+        <p><strong>Примечание:</strong> Параметр 1 обычно обозначает длину, Параметр 2 - ширину изделия (в метрах).</p>
+        
+        {% if not product_types or not material_types %}
+            <div class="alert alert-danger">
+                <p><strong>Ошибка:</strong> Нет данных для расчета. Проверьте импорт данных в базу.</p>
+            </div>
+        {% else %}
+            <form method="POST" novalidate>
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group">
+                    {{ form.product_type_id.label }}*
+                    {{ form.product_type_id(class="form-control") }}
+                    {% if form.product_type_id.errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.product_type_id.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.material_type_id.label }}*
+                    {{ form.material_type_id(class="form-control") }}
+                    {% if form.material_type_id.errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.material_type_id.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.quantity.label }}*
+                    {{ form.quantity(class="form-control", placeholder="Введите количество единиц продукции", min=1) }}
+                    {% if form.quantity.errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.quantity.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.param1.label }}* (длина в метрах)
+                    {{ form.param1(class="form-control", placeholder="Введите положительное число", step="0.01", min="0.01") }}
+                    {% if form.param1.errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.param1.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.param2.label }}* (ширина в метрах)
+                    {{ form.param2(class="form-control", placeholder="Введите положительное число", step="0.01", min="0.01") }}
+                    {% if form.param2.errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.param2.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn">Рассчитать</button>
+                </div>
+            </form>
+        {% endif %}
+        
+        {% if result is not none %}
+            <div class="result-container">
+                {% if result == -1 %}
+                    <h3>Ошибка при расчете</h3>
+                    <p class="error">Расчет не выполнен. Проверьте введенные данные и убедитесь, что:</p>
+                    <ul>
+                        <li>Все поля заполнены корректно</li>
+                        <li>Выбраны существующие тип продукции и материал</li>
+                        <li>Параметры больше нуля</li>
+                        <li>Количество продукции больше нуля</li>
+                    </ul>
+                    <p><small>Для диагностики проблемы проверьте консоль сервера на наличие детальных сообщений об ошибках.</small></p>
+                {% else %}
+                    <h3>Результат расчета:</h3>
+                    <p>Для производства {{ form.quantity.data }} единиц продукции типа "{{ product_type.name }}" из материала "{{ material_type.name }}" потребуется <strong>{{ result }} м² сырья</strong>.</p>
+                    <p><strong>Детали расчета:</strong></p>
+                    <ul>
+                        <li>Площадь одного изделия: {{ "%.2f"|format(form.param1.data * form.param2.data) }} м²</li>
+                        <li>Базовое количество с учетом коэффициента типа: {{ "%.2f"|format(form.param1.data * form.param2.data * product_type.coefficient) }} м²</li>
+                        <li>Процент потерь для материала "{{ material_type.name }}": {{ "%.2f"|format(material_type.waste_percentage * 100) }}%</li>
+                        <li>Количество с учетом потерь для одной единицы: {{ "%.2f"|format(form.param1.data * form.param2.data * product_type.coefficient * (1 + material_type.waste_percentage)) }} м²</li>
+                    </ul>
+                    <p><small>* Расчет учитывает коэффициент типа продукции и процент потерь для выбранного материала.</small></p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

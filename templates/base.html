@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Комфорт - Мебельная компания{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
+    <style>
+        body {
+            font-family: 'Candara', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <a href="{{ url_for('index') }}" class="logo">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Логотип Комфорт" class="logo-img">
+                <div class="logo-text">Комфорт</div>
+            </a>
+            <nav class="nav-menu">
+                <a href="{{ url_for('index') }}">Главная</a>
+                <a href="{{ url_for('products') }}">Продукция</a>
+                <a href="{{ url_for('material_calculator') }}">Калькулятор сырья</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="{{ url_for('index') }}" {% if request.endpoint == 'index' %}class="active"{% endif %}>Главная</a></li>
+                <li><a href="{{ url_for('products') }}" {% if request.endpoint in ['products', 'add_product', 'edit_product'] %}class="active"{% endif %}>Продукция</a></li>
+                <li><a href="{{ url_for('material_calculator') }}" {% if request.endpoint == 'material_calculator' %}class="active"{% endif %}>Калькулятор сырья</a></li>
+            </ul>
+        </div>
+
+        <div class="content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{% if category == 'error' %}danger{% else %}success{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            © 2006–2025 Мебельная компания "Комфорт"
+        </div>
+    </footer>
+
+    <script>
+        // Функция для фиксации высоты sidebar
+        function adjustSidebarHeight() {
+            const sidebar = document.querySelector('.sidebar');
+            const headerHeight = document.querySelector('.header').offsetHeight;
+            const windowHeight = window.innerHeight;
+            const footerHeight = document.querySelector('.footer').offsetHeight;
+            
+            if (sidebar && windowHeight > headerHeight) {
+                // Высота sidebar = высота окна - высота хедера - высота футера
+                sidebar.style.height = `${windowHeight - headerHeight - footerHeight}px`;
+            }
+        }
+
+        // Вызываем при загрузке и изменении размера окна
+        window.addEventListener('load', adjustSidebarHeight);
+        window.addEventListener('resize', adjustSidebarHeight);
+        
+        // Подтверждение при удалении
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if (!confirm('Вы уверены, что хотите удалить этот элемент? Это действие нельзя отменить.')) {
+                        e.preventDefault();
+                    }
+                });
+            });
+            
+            // Подсветка активного пункта меню
+            const currentPath = window.location.pathname;
+            const menuLinks = document.querySelectorAll('.sidebar-menu a, .nav-menu a');
+            menuLinks.forEach(link => {
+                const linkPath = new URL(link.href).pathname;
+                if (currentPath.startsWith(linkPath)) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // Инициализируем высоту sidebar при загрузке
+            adjustSidebarHeight();
+        });
+    </script>
+</body>
+</html>

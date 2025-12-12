@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Комфорт - Цеха для производства{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Цеха для производства "{{ product.name }}"</h1>
+    
+    <a href="{{ url_for('products') }}" class="btn btn-back">Назад к списку продукции</a>
+    
+    <div class="info-container">
+        <p><strong>Артикул:</strong> {{ product.article }}</p>
+        <p><strong>Общее время производства:</strong> {{ total_time }} час(ов)</p>
+    </div>
+    
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Название цеха</th>
+                    <th>Количество работников</th>
+                    <th>Время в цехе (часы)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for workshop in workshops %}
+                <tr>
+                    <td>{{ workshop.workshop.name }}</td>
+                    <td>{{ workshop.worker_count }}</td>
+                    <td>{{ workshop.time_in_workshop }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" style="text-align: center;">Нет данных о цехах для данного продукта</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
