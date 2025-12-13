@@ -44,20 +44,29 @@ def calculate_raw_material(product_type_id, material_type_id, quantity, param1, 
         print(f"Расчет для: {product_type.name}, материал: {material_type.name}")
         print(f"Входные данные: quantity={quantity}, param1={param1}, param2={param2}")
         
-        # Проверяем коэффициенты
+        # Проверяем коэффициенты и потери
         if product_type.coefficient is None:
             print("Ошибка: Коэффициент типа продукции не установлен")
             return -1
         
-        material_loss = float(material_type.waste_percentage)
-        coefficient = float(product_type.coefficient)
+        if material_type.waste_percentage is None:
+            print("Ошибка: Процент потерь материала не установлен")
+            return -1
+            
+        try:
+            material_loss = float(material_type.waste_percentage)
+            coefficient = float(product_type.coefficient)
+        except ValueError:
+            print("Ошибка: Коэффициент или процент потерь не являются числами")
+            return -1
         
         print(f"Коэффициент типа продукции: {coefficient}")
         print(f"Процент потерь материала: {material_loss}")
         
         # Основной расчет
         area = param1 * param2
-        base_material = area * coefficient
+        # Явное преобразование обоих операндов к float для гарантированной совместимости
+        base_material = float(area) * float(coefficient)
         print(f"Базовая площадь: {area}")
         print(f"Базовое количество сырья: {base_material}")
         
